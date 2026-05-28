@@ -23,6 +23,7 @@ model User {
   phoneE164     String       @unique
   role          Role         @default(USER)
   createdAt     DateTime     @default(now())
+  adminRooms    Room[]       @relation("roomAdmin")
   memberships   RoomMember[]
   ratingsGiven  MatchRating[] @relation("ratingsGiven")
 }
@@ -31,7 +32,7 @@ model Room {
   id          String        @id @default(cuid())
   name        String
   adminUserId String
-  adminUser   User          @relation(fields: [adminUserId], references: [id])
+  adminUser   User          @relation("roomAdmin", fields: [adminUserId], references: [id])
   createdAt   DateTime      @default(now())
   members     RoomMember[]
   invites     Invite[]
