@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pitch Squad Builder</title>
+  <style>
+    :root { --bg:#0b1220; --card:#121a2b; --text:#e8eefc; --muted:#9fb0d0; --line:#23304a; --chip:#0f1727; }
+    *{box-sizing:border-box} body{margin:0;font-family:ui-sans-serif,system-ui;background:radial-gradient(circle at 20% 0%,#1b2a46,#0b1220 55%);color:var(--text)}
+    .wrap{max-width:1200px;margin:0 auto;padding:24px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+    input,select,button{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0f1727;color:var(--text)}
+    button{background:linear-gradient(90deg,#14b8a6,#22d3ee);color:#001018;border:0;font-weight:700;cursor:pointer}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.muted{color:var(--muted)}.pill{display:inline-block;background:var(--chip);border:1px solid var(--line);padding:4px 8px;border-radius:99px;color:var(--muted);margin-right:6px}
+    .nav{display:flex;gap:8px;margin:12px 0}.nav button{background:#1e293b;color:#dbeafe}.nav button.active{background:#14b8a6;color:#032b2b}
+    .page{display:none}.page.active{display:block}
+    .pitch{position:relative;aspect-ratio:6/9;background:linear-gradient(180deg,#1f7a3f,#176534);border-radius:14px;border:2px solid rgba(255,255,255,.2);overflow:hidden;max-width:260px;width:100%;margin:0 auto}
+    .pitch .midline{position:absolute;top:50%;left:0;right:0;border-top:2px solid rgba(255,255,255,.35)}
+    .pos-btn{position:absolute;transform:translate(-50%,-50%);width:58px;height:34px;border-radius:10px;border:1px solid rgba(255,255,255,.45);background:rgba(10,20,30,.45);color:#fff;font-size:12px}
+    .pos-btn.active{background:#14b8a6;color:#032b2b;border-color:#6ee7d8;font-weight:700}
+    .order-item{display:flex;gap:8px;align-items:center;background:var(--chip);border:1px solid var(--line);padding:8px;border-radius:10px;margin-top:6px}
+    .order-item .tag{font-size:12px;color:#001018;background:#5eead4;padding:2px 8px;border-radius:999px}
+    .order-item button{width:auto;padding:6px 10px;background:#1e293b;color:#dbeafe;border:1px solid #334155}
+    .attrs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.attr-group h5{margin:8px 0;color:#a5b4fc}.attr{display:grid;grid-template-columns:1fr 74px;gap:8px;align-items:center}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Pitch Squad Builder</h1>
+  <p class="muted">Arayüz Türkçe, kod altyapısı İngilizce kaldı.</p>
+  <div class="nav">
+    <button id="tab-player" class="active">Oyuncu Kaydet</button>
+    <button id="tab-team">Takım Oluştur</button>
+  </div>
+
+  <section id="page-player" class="page active card">
+    <h3>Oyuncu Kaydet</h3>
+    <div class="row"><input id="name" placeholder="Oyuncu adı"/><input id="teamCount" type="number" min="2" max="4" value="2"/></div>
+    <h4>Hazır Profil (Opsiyonel)</h4>
+    <div class="row"><select id="presetTeam"><option value="">Takım seç</option></select><select id="presetPlayer"><option value="">Oyuncu seç</option></select></div>
+    <p class="muted">Büyük Türk takımlarından sınırlı örnek veri. Seçince form dolar, sonra düzenleyebilirsin.</p>
+
+    <h4>Saha Üzerinden Mevki Seç</h4>
+    <div class="pitch" id="pitch"><div class="midline"></div></div>
+    <div id="posOrder" class="muted" style="margin-top:8px">Mevki seçilmedi.</div>
+
+    <h4>Özellikler (FM tarzı)</h4>
+    <div id="attrs"></div>
+    <button id="addBtn" style="margin-top:12px">Oyuncuyu Kaydet</button>
+  </section>
+
+  <section id="page-team" class="page card">
+    <h3>Takım Oluştur</h3>
+    <button id="balanceBtn">Dengeli Takımları Üret</button>
+    <h4>Kayıtlı Oyuncular</h4>
+    <ul id="players"></ul>
+    <h4>Sonuç</h4>
+    <div id="result" class="muted">Henüz sonuç yok.</div>
+  </section>
+</div>
+<script>
+const presetData={
+  "Beşiktaş 2024/25":[
+    {name:"Mert Günok",positions:["GK"],attributes:{pace:7,stamina:11,strength:12,agility:13,technique:9,passing:11,vision:10,finishing:2,firstTouch:10,tackling:3,marking:4,positioning:15,reflexes:16,handling:15}},
+    {name:"Rafa Silva",positions:["AM","LW"],attributes:{pace:15,stamina:14,strength:9,agility:16,technique:16,passing:15,vision:16,finishing:14,firstTouch:16,tackling:7,marking:6,positioning:14,reflexes:3,handling:2}},
+    {name:"Semih Kılıçsoy",positions:["ST","LW"],attributes:{pace:14,stamina:13,strength:12,agility:14,technique:13,passing:11,vision:11,finishing:14,firstTouch:14,tackling:6,marking:5,positioning:13,reflexes:2,handling:2}},
+    {name:"Gedson Fernandes",positions:["CM","DM"],attributes:{pace:14,stamina:16,strength:12,agility:14,technique:13,passing:13,vision:12,finishing:10,firstTouch:13,tackling:13,marking:11,positioning:12,reflexes:2,handling:2}}
+  ],
+  "Galatasaray 2024/25":[
+    {name:"Mauro Icardi",positions:["ST"],attributes:{pace:11,stamina:12,strength:14,agility:12,technique:15,passing:12,vision:13,finishing:17,firstTouch:16,tackling:5,marking:4,positioning:16,reflexes:2,handling:2}},
+    {name:"Lucas Torreira",positions:["DM","CM"],attributes:{pace:13,stamina:17,strength:11,agility:14,technique:13,passing:14,vision:13,finishing:8,firstTouch:13,tackling:16,marking:15,positioning:15,reflexes:3,handling:2}},
+    {name:"Barış Alper Yılmaz",positions:["RW","LW","ST"],attributes:{pace:16,stamina:15,strength:12,agility:14,technique:12,passing:11,vision:10,finishing:12,firstTouch:12,tackling:8,marking:7,positioning:12,reflexes:2,handling:2}},
+    {name:"Dries Mertens",positions:["AM","ST"],attributes:{pace:11,stamina:11,strength:8,agility:13,technique:15,passing:15,vision:16,finishing:13,firstTouch:15,tackling:7,marking:6,positioning:14,reflexes:2,handling:2}}
+  ],
+  "Fenerbahçe 2024/25":[
+    {name:"Dusan Tadic",positions:["LW","AM"],attributes:{pace:11,stamina:13,strength:10,agility:12,technique:16,passing:16,vision:16,finishing:13,firstTouch:16,tackling:7,marking:7,positioning:14,reflexes:2,handling:2}},
+    {name:"Fred",positions:["CM","DM"],attributes:{pace:13,stamina:16,strength:11,agility:14,technique:14,passing:15,vision:14,finishing:10,firstTouch:14,tackling:14,marking:12,positioning:13,reflexes:3,handling:2}},
+    {name:"İrfan Can Kahveci",positions:["RW","AM","CM"],attributes:{pace:12,stamina:13,strength:10,agility:12,technique:15,passing:15,vision:15,finishing:12,firstTouch:14,tackling:8,marking:7,positioning:13,reflexes:2,handling:2}},
+    {name:"Sebastian Szymanski",positions:["AM","CM"],attributes:{pace:12,stamina:14,strength:10,agility:13,technique:14,passing:14,vision:14,finishing:11,firstTouch:14,tackling:9,marking:8,positioning:13,reflexes:2,handling:2}}
+  ],
+  "Trabzonspor 2024/25":[
+    {name:"Ugurcan Çakır",positions:["GK"],attributes:{pace:8,stamina:12,strength:13,agility:13,technique:9,passing:10,vision:9,finishing:2,firstTouch:10,tackling:3,marking:4,positioning:15,reflexes:16,handling:15}},
+    {name:"Edin Vişça",positions:["RW","AM"],attributes:{pace:14,stamina:15,strength:9,agility:15,technique:14,passing:14,vision:14,finishing:12,firstTouch:14,tackling:8,marking:7,positioning:13,reflexes:2,handling:2}},
+    {name:"Enis Destan",positions:["ST"],attributes:{pace:13,stamina:12,strength:13,agility:11,technique:11,passing:9,vision:9,finishing:12,firstTouch:11,tackling:6,marking:5,positioning:12,reflexes:2,handling:2}},
+    {name:"Bardhi",positions:["AM","CM"],attributes:{pace:11,stamina:13,strength:9,agility:12,technique:14,passing:14,vision:14,finishing:11,firstTouch:14,tackling:8,marking:7,positioning:12,reflexes:2,handling:2}}
+  ]
+};
+const pitchLayout=[['GK',50,92],['LB',20,73],['CB',50,73],['RB',80,73],['DM',50,58],['CM',50,48],['AM',50,36],['LW',20,23],['ST',50,14],['RW',80,23]];
+const attrGroups={Physical:[['acceleration','Hızlanma'],['pace','Hız'],['stamina','Dayanıklılık'],['strength','Güç'],['agility','Çeviklik'],['jumpingReach','Zıplama']],Technical:[['technique','Teknik'],['dribbling','Top Sürme'],['passing','Pas'],['finishing','Bitiricilik'],['firstTouch','İlk Kontrol'],['longShots','Uzaktan Şut'],['tackling','Müdahale'],['marking','Markaj']],Mental:[['vision','Vizyon'],['positioning','Pozisyon Alma'],['decisions','Karar Verme'],['composure','Soğukkanlılık'],['aggression','Agresiflik'],['teamwork','Takım Oyunu'],['workRate','Çalışkanlık']],Goalkeeping:[['reflexes','Refleks'],['handling','Top Tutma']]};
+let players=[];let selectedPositions=[];
+const byId=id=>document.getElementById(id);
+byId('tab-player').onclick=()=>switchTab('player');byId('tab-team').onclick=()=>switchTab('team');
+function switchTab(tab){byId('tab-player').classList.toggle('active',tab==='player');byId('tab-team').classList.toggle('active',tab==='team');byId('page-player').classList.toggle('active',tab==='player');byId('page-team').classList.toggle('active',tab==='team');}
+function initPreset(){const t=byId('presetTeam');Object.keys(presetData).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=k;t.appendChild(o)});t.onchange=()=>{const p=byId('presetPlayer');p.innerHTML='<option value="">Oyuncu seç</option>';(presetData[t.value]||[]).forEach((x,i)=>{const o=document.createElement('option');o.value=String(i);o.textContent=x.name;p.appendChild(o)});};byId('presetPlayer').onchange=()=>{const team=t.value;const i=Number(byId('presetPlayer').value);if(!team||Number.isNaN(i))return;const pl=presetData[team][i];if(!pl)return;byId('name').value=pl.name;selectedPositions=[...pl.positions];refreshPitchButtons();renderPositionOrder();Object.values(attrGroups).flat().forEach(([k])=>{byId('a_'+k).value=pl.attributes[k]??10;});};}
+function renderPitch(){const p=byId('pitch');pitchLayout.forEach(([k,x,y])=>{const b=document.createElement('button');b.type='button';b.className='pos-btn';b.textContent=k;b.dataset.pos=k;b.style.left=x+'%';b.style.top=y+'%';b.onclick=()=>togglePos(k);p.appendChild(b)});refreshPitchButtons();}
+function togglePos(pos){selectedPositions.includes(pos)?selectedPositions=selectedPositions.filter(x=>x!==pos):selectedPositions.push(pos);refreshPitchButtons();renderPositionOrder();}
+function refreshPitchButtons(){document.querySelectorAll('.pos-btn').forEach(b=>b.classList.toggle('active',selectedPositions.includes(b.dataset.pos)));}
+function renderPositionOrder(){const el=byId('posOrder');if(!selectedPositions.length){el.textContent='Mevki seçilmedi.';return;}el.innerHTML='';selectedPositions.forEach((p,i)=>{const row=document.createElement('div');row.className='order-item';row.innerHTML=`<strong style="min-width:44px">${p}</strong><span class="tag">${i===0?'Birincil':(i===1?'İkincil':'Alternatif')}</span><div style="margin-left:auto;display:flex;gap:6px"><button ${i===0?'disabled':''}>↑</button><button ${i===selectedPositions.length-1?'disabled':''}>↓</button><button>✕</button></div>`;const [u,d,x]=row.querySelectorAll('button');u.onclick=()=>swap(i,i-1);d.onclick=()=>swap(i,i+1);x.onclick=()=>{selectedPositions=selectedPositions.filter(v=>v!==p);refreshPitchButtons();renderPositionOrder();};el.appendChild(row);});}
+function swap(a,b){if(b<0||b>=selectedPositions.length)return;const c=[...selectedPositions];[c[a],c[b]]=[c[b],c[a]];selectedPositions=c;renderPositionOrder();}
+function renderAttrs(){const root=byId('attrs');Object.entries(attrGroups).forEach(([g,list])=>{const box=document.createElement('div');box.className='attr-group';box.innerHTML=`<h5>${g}</h5><div class='attrs'></div>`;const grid=box.querySelector('.attrs');list.forEach(([k,l])=>{const r=document.createElement('div');r.className='attr';r.innerHTML=`<label for='a_${k}'>${l}</label><input id='a_${k}' type='number' min='1' max='20' value='10'/>`;grid.appendChild(r);});root.appendChild(box);});}
+function renderPlayers(){byId('players').innerHTML=players.map(p=>`<li><b>${p.name}</b> <span class='pill'>${p.positions.join(' > ')}</span></li>`).join('')||'<li class="muted">Kayıtlı oyuncu yok</li>';}
+byId('addBtn').onclick=()=>{const name=byId('name').value.trim();if(!name||!selectedPositions.length)return;const attributes={};Object.values(attrGroups).flat().forEach(([k])=>attributes[k]=Number(byId('a_'+k).value||10));players.push({id:crypto.randomUUID(),name,positions:[...selectedPositions],attributes});byId('name').value='';selectedPositions=[];refreshPitchButtons();renderPositionOrder();renderPlayers();switchTab('team');};
+byId('balanceBtn').onclick=async()=>{const teamCount=Number(byId('teamCount').value||2);const r=await fetch('/api/balance',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({teamCount,players})});const d=await r.json();if(!r.ok){byId('result').textContent=JSON.stringify(d);return;}byId('result').innerHTML=d.teams.map(t=>`<p><b>${t.name}</b> - Güç: ${t.totalPower}<br/>${t.playerIds.map(id=>d.players.find(p=>p.id===id)?.name).join(', ')}</p>`).join('');};
+renderPitch();renderPositionOrder();renderAttrs();renderPlayers();initPreset();
+</script>
+</body>
+</html>
