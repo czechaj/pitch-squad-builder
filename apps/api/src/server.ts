@@ -4,7 +4,7 @@ import { z } from "zod";
 
 const env = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL zorunlu"),
-  DIRECT_URL: z.string().optional(),
+  DATABASE_URL_UNPOOLED: z.string().optional(),
   PORT: z.string().optional()
 }).safeParse(process.env);
 

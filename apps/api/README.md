@@ -7,7 +7,7 @@ Production ortaminda (Vercel) tum degiskenler **Environment Variables** olarak t
 
 - `DATABASE_URL` (zorunlu)
   - Neon pooled URL (runtime)
-- `DIRECT_URL` (onerilen)
+- `DATABASE_URL_UNPOOLED` (onerilen)
   - Neon direct/non-pooled URL (migration)
 - `PORT` (opsiyonel)
 
@@ -16,7 +16,7 @@ Production ortaminda (Vercel) tum degiskenler **Environment Variables** olarak t
 1. Vercel Project -> `Settings` -> `Environment Variables`
 2. Asagidaki degiskenleri ekle:
    - `DATABASE_URL`
-   - `DIRECT_URL`
+   - `DATABASE_URL_UNPOOLED`
 3. Ortam secimi:
    - `Preview`
    - `Production`
