@@ -2,6 +2,17 @@ import Fastify from "fastify";
 import { PrismaClient, Role } from "@prisma/client";
 import { z } from "zod";
 
+const env = z.object({
+  DATABASE_URL: z.string().min(1, "DATABASE_URL zorunlu"),
+  DIRECT_URL: z.string().optional(),
+  PORT: z.string().optional()
+}).safeParse(process.env);
+
+if (!env.success) {
+  console.error("Eksik/hatali environment variables:", env.error.flatten().fieldErrors);
+  process.exit(1);
+}
+
 const prisma = new PrismaClient();
 const app = Fastify({ logger: true });
 
