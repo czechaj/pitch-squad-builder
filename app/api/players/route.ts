@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { createPlayer } from "@/lib/mock-store";
 
 const playerSchema = z.object({
   roomId: z.string().min(1),
@@ -14,7 +13,24 @@ const playerSchema = z.object({
 export async function POST(req: Request) {
   try {
     const body = playerSchema.parse(await req.json());
-    const player = await createPlayer(body);
+    const reqRuntime = eval("require");
+    const { PrismaClient } = reqRuntime("@prisma/client") as { PrismaClient: new () => any };
+    const prisma = new PrismaClient();
+
+    const [primaryPosition, secondaryPosition, ...alternatives] = body.positions;
+    const player = await prisma.player.create({
+      data: {
+        userId: body.userId,
+        name: body.name,
+        power: body.power,
+        primaryPosition,
+        secondaryPosition: secondaryPosition || null,
+        alternativePositions: JSON.stringify(alternatives),
+        statsJson: JSON.stringify(body.stats),
+      },
+    });
+
+    await prisma.$disconnect();
     return NextResponse.json({ ok: true, playerId: player.id });
   } catch (e: any) {
     return NextResponse.json({ ok: false, error: e.message }, { status: 400 });
