@@ -3,8 +3,22 @@
 body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: #f6f7f9; color: #111827; }
 main { max-width: 960px; margin: 0 auto; padding: 24px; }
 h1 { margin: 0 0 8px; }
+h2 { margin: 0 0 10px; }
 textarea { width: 100%; min-height: 300px; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 button { padding: 10px 16px; border: 0; border-radius: 10px; background: #0f766e; color: #fff; cursor: pointer; font-weight: 600; }
 pre { background: #111827; color: #e5e7eb; padding: 12px; border-radius: 10px; overflow: auto; }
-.row { display: grid; gap: 16px; }
+.row { display: grid; gap: 16px; grid-template-columns: 1.1fr .9fr; }
 .card { background: #fff; padding: 16px; border-radius: 12px; border: 1px solid #e5e7eb; }
+.controls { margin-bottom: 16px; }
+.count-buttons { display: flex; gap: 8px; margin-top: 8px; }
+.count-buttons button { background: #d1d5db; color: #111827; }
+.count-buttons button.active { background: #0f766e; color: #fff; }
+.teams { display: grid; gap: 10px; }
+.team { border: 1px solid #d1d5db; border-radius: 10px; padding: 10px; background: #f9fafb; }
+.team h3 { margin: 0 0 6px; }
+.team p { margin: 0 0 6px; font-size: 13px; color: #4b5563; }
+.team ul { margin: 0; padding-left: 18px; }
+
+@media (max-width: 900px) {
+  .row { grid-template-columns: 1fr; }
+}
