@@ -33,7 +33,17 @@ export default function HomePage() {
     Object.fromEntries(statGroups.flatMap((group) => group.items.map((item) => [item, 10]))),
   );
 
-  const presetPlayers = useMemo(() => (teamProfile ? presetPlayerPools[teamProfile] || [] : []), [teamProfile]);
+  const presetPlayers = useMemo(
+    () => (teamProfile ? (presetPlayerPools[teamProfile] || []).filter((name) => Boolean(presetPlayerProfiles[name])) : []),
+    [teamProfile],
+  );
+  const presetTeams = useMemo(
+    () =>
+      Object.keys(presetPlayerPools).filter((team) =>
+        (presetPlayerPools[team] || []).some((name) => Boolean(presetPlayerProfiles[name])),
+      ),
+    [],
+  );
   const defaultStats = useMemo(
     () => Object.fromEntries(statGroups.flatMap((group) => group.items.map((item) => [item, 10]))),
     [],
@@ -68,13 +78,7 @@ export default function HomePage() {
       return;
     }
     const profile = presetPlayerProfiles[name];
-    if (!profile) {
-      setPlayerName(name);
-      setPower(12);
-      setSelectedPosition(["CM"]);
-      setStats(defaultStats);
-      return;
-    }
+    if (!profile) return;
 
     setPlayerName(name);
     setPower(profile.power);
@@ -123,6 +127,10 @@ export default function HomePage() {
     if (tab === "teams") loadTeamPlayers();
   }, [tab]);
 
+  useEffect(() => {
+    setPresetPlayer("");
+  }, [teamProfile]);
+
   return (
     <main className="legacy-main">
       <h1>Pitch Squad Builder</h1>
@@ -148,7 +156,7 @@ export default function HomePage() {
               <div className="preset-row">
                 <select value={teamProfile} onChange={(e) => setTeamProfile(e.target.value)}>
                   <option value="">Takim sec</option>
-                  {Object.keys(presetPlayerPools).map((team) => <option key={team} value={team}>{team}</option>)}
+                  {presetTeams.map((team) => <option key={team} value={team}>{team}</option>)}
                 </select>
                 <select value={presetPlayer} onChange={(e) => onSelectPreset(e.target.value)}>
                   <option value="">Oyuncu sec</option>
