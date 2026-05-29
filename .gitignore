@@ -1,6 +1,5 @@
-.vercel
 node_modules
-apps/api/node_modules
-.env
-.env.*
+.next
+dist
+.env*
 !.env.example
