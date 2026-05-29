@@ -24,7 +24,7 @@ export default function HomePage() {
   const [power, setPower] = useState(2);
   const [teamProfile, setTeamProfile] = useState("");
   const [presetPlayer, setPresetPlayer] = useState("");
-  const [selectedPosition, setSelectedPosition] = useState<string[]>(["LW", "ST", "AM"]);
+  const [selectedPosition, setSelectedPosition] = useState<string[]>([]);
   const [saveStatus, setSaveStatus] = useState<string>("");
   const [stats, setStats] = useState<Record<string, number>>(
     Object.fromEntries(statGroups.flatMap((group) => group.items.map((item) => [item, 10]))),
@@ -57,10 +57,19 @@ export default function HomePage() {
 
   function onSelectPreset(name: string) {
     setPresetPlayer(name);
-    if (!name) return;
+    if (!name) {
+      setPlayerName("");
+      setPower(2);
+      setSelectedPosition([]);
+      setStats(defaultStats);
+      return;
+    }
     const profile = presetPlayerProfiles[name];
     if (!profile) {
       setPlayerName(name);
+      setPower(12);
+      setSelectedPosition(["CM"]);
+      setStats(defaultStats);
       return;
     }
 
