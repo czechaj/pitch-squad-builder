@@ -1,7 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+type PrismaLike = Record<string, never>;
 
-const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
-
-export const prisma = globalForPrisma.prisma ?? new PrismaClient();
-
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+// Build-safe placeholder: real Prisma wiring will be added when DB flow is finalized.
+export const prisma = {} as PrismaLike;
