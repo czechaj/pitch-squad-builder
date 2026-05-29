@@ -1,24 +1,36 @@
-:root { color-scheme: light; }
+:root { color-scheme: dark; }
 * { box-sizing: border-box; }
-body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: #f6f7f9; color: #111827; }
-main { max-width: 960px; margin: 0 auto; padding: 24px; }
-h1 { margin: 0 0 8px; }
-h2 { margin: 0 0 10px; }
-textarea { width: 100%; min-height: 300px; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-button { padding: 10px 16px; border: 0; border-radius: 10px; background: #0f766e; color: #fff; cursor: pointer; font-weight: 600; }
-pre { background: #111827; color: #e5e7eb; padding: 12px; border-radius: 10px; overflow: auto; }
-.row { display: grid; gap: 16px; grid-template-columns: 1.1fr .9fr; }
-.card { background: #fff; padding: 16px; border-radius: 12px; border: 1px solid #e5e7eb; }
-.controls { margin-bottom: 16px; }
-.count-buttons { display: flex; gap: 8px; margin-top: 8px; }
-.count-buttons button { background: #d1d5db; color: #111827; }
-.count-buttons button.active { background: #0f766e; color: #fff; }
-.teams { display: grid; gap: 10px; }
-.team { border: 1px solid #d1d5db; border-radius: 10px; padding: 10px; background: #f9fafb; }
-.team h3 { margin: 0 0 6px; }
-.team p { margin: 0 0 6px; font-size: 13px; color: #4b5563; }
-.team ul { margin: 0; padding-left: 18px; }
-
+body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: radial-gradient(circle at top, #112342, #091425 55%); color: #e8eef7; }
+h1,h2,h3 { margin: 0; }
+button,input,select { font: inherit; }
+.legacy-main { max-width: 1100px; margin: 0 auto; padding: 24px 20px 40px; }
+.legacy-main p { color: #a8b7cb; margin: 10px 0; }
+.admin-link { color: #7ea8ff; display: inline-block; margin-bottom: 14px; }
+.legacy-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.legacy-tabs button { background: #101c31; color: #cad8ea; border: 1px solid #2f4260; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 700; }
+.legacy-tabs button.active { background: linear-gradient(180deg, #4f627d, #30445f); color: #fff; }
+.panel { background: #1a2638; border: 1px solid #334861; border-radius: 10px; padding: 16px; }
+.form-head { display: grid; grid-template-columns: 1fr .2fr; gap: 10px; margin: 14px 0; }
+input,select { background: #0f1a2d; color: #e8eef7; border: 1px solid #2e425d; border-radius: 8px; padding: 9px 10px; }
+.content-grid { display: grid; grid-template-columns: .56fr .44fr; gap: 14px; }
+.preset-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.muted { color: #a3b3c9; }
+.pitch { margin-top: 8px; background: #1e8f46; border: 2px solid #4cb670; border-radius: 14px; padding: 10px; max-width: 220px; }
+.pitch-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px; }
+.pitch-row:last-child { margin-bottom: 0; }
+.pos-btn { border: 1px solid #5b8068; background: #245a3a; color: #f6fff8; border-radius: 9px; padding: 7px 0; cursor: pointer; }
+.pos-btn.on { background: #2cc3ca; border-color: #79f0f4; color: #05272c; font-weight: 700; }
+.priority-list { margin-top: 10px; display: grid; gap: 8px; max-width: 360px; }
+.priority-item { display: grid; grid-template-columns: .5fr .8fr auto; align-items: center; background: #111f34; border: 1px solid #2d4360; border-radius: 8px; padding: 6px 8px; }
+.pill { background: #324e73; border-radius: 999px; padding: 3px 9px; font-size: 12px; color: #d6e4f7; }
+.prio-actions button { background: #243956; border: 1px solid #3d5c85; color: #d8e7fc; border-radius: 6px; margin-left: 5px; width: 28px; height: 28px; cursor: pointer; }
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+fieldset { border: 1px solid #2f4260; border-radius: 9px; padding: 8px; margin: 0; }
+legend { color: #e4cf8f; font-weight: 700; padding: 0 6px; font-size: 12px; }
+fieldset label { display: grid; grid-template-columns: 1fr 68px; align-items: center; gap: 8px; margin-bottom: 7px; color: #d5e2f2; font-size: 14px; }
+fieldset label:last-child { margin-bottom: 0; }
+.save-btn { width: 100%; margin-top: 14px; border: 1px solid #4d6787; background: linear-gradient(180deg, #3d5677, #2c405b); color: #fff; border-radius: 10px; padding: 11px 14px; font-weight: 700; cursor: pointer; }
 @media (max-width: 900px) {
-  .row { grid-template-columns: 1fr; }
+  .content-grid, .stats-grid { grid-template-columns: 1fr; }
+  .form-head { grid-template-columns: 1fr; }
 }
