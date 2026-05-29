@@ -5,22 +5,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pitch Squad Builder</title>
   <style>
-    :root { --bg:#0b1220; --card:#121a2b; --text:#e8eefc; --muted:#9fb0d0; --line:#23304a; --chip:#0f1727; }
-    *{box-sizing:border-box} body{margin:0;font-family:ui-sans-serif,system-ui;background:radial-gradient(circle at 20% 0%,#1b2a46,#0b1220 55%);color:var(--text)}
-    .wrap{max-width:1200px;margin:0 auto;padding:24px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
-    input,select,button{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0f1727;color:var(--text)}
-    button{background:linear-gradient(90deg,#14b8a6,#22d3ee);color:#001018;border:0;font-weight:700;cursor:pointer}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.muted{color:var(--muted)}.pill{display:inline-block;background:var(--chip);border:1px solid var(--line);padding:4px 8px;border-radius:99px;color:var(--muted);margin-right:6px}
-    .nav{display:flex;gap:8px;margin:12px 0}.nav button{background:#1e293b;color:#dbeafe}.nav button.active{background:#14b8a6;color:#032b2b}
+    :root { --bg:#111418; --card:#1a2027; --panel:#1d2530; --text:#e4e9ef; --muted:#9aa6b5; --line:#2f3a47; --line-soft:#42505f; --chip:#161d26; --gold:#d9b66f; --value:#f2f5fa; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;background:radial-gradient(circle at 25% 0%,#202a36,#111418 58%);color:var(--text);letter-spacing:.1px}
+    .wrap{max-width:1200px;margin:0 auto;padding:24px}
+    .card{background:linear-gradient(180deg,#212934,#1a2027);border:1px solid var(--line);border-radius:10px;padding:16px;box-shadow:0 8px 28px rgba(0,0,0,.32)}
+    input,select,button{width:100%;padding:10px;border-radius:8px;border:1px solid var(--line);background:#141b23;color:var(--text)}
+    button{background:linear-gradient(180deg,#2d3a49,#253240);color:#eaf1fa;border:1px solid #3e4e5f;font-weight:700;cursor:pointer}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .compact-grid{display:grid;grid-template-columns:320px 1fr;gap:12px;align-items:start}
+    .compact-left,.compact-right{min-width:0}
+    .compact-right h4,.compact-left h4{margin:8px 0}
+    .muted{color:var(--muted)}
+    .pill{display:inline-block;background:var(--chip);border:1px solid var(--line);padding:4px 8px;border-radius:99px;color:var(--muted);margin-right:6px}
+    .nav{display:flex;gap:8px;margin:12px 0}
+    .nav button{background:#1a222d;color:#cfd9e4}
+    .nav button.active{background:linear-gradient(180deg,#4e5f72,#3d4e60);color:#f5f8fc;border-color:#657a90}
     .page{display:none}.page.active{display:block}
-    .pitch{position:relative;aspect-ratio:6/9;background:linear-gradient(180deg,#1f7a3f,#176534);border-radius:14px;border:2px solid rgba(255,255,255,.2);overflow:hidden;max-width:260px;width:100%;margin:0 auto}
+    .pitch{position:relative;aspect-ratio:6/9;background:linear-gradient(180deg,#1f7a3f,#176534);border-radius:12px;border:2px solid rgba(255,255,255,.2);overflow:hidden;max-width:210px;width:100%;margin:0 auto}
     .pitch .midline{position:absolute;top:50%;left:0;right:0;border-top:2px solid rgba(255,255,255,.35)}
-    .pos-btn{position:absolute;transform:translate(-50%,-50%);width:58px;height:34px;border-radius:10px;border:1px solid rgba(255,255,255,.45);background:rgba(10,20,30,.45);color:#fff;font-size:12px}
+    .pos-btn{position:absolute;transform:translate(-50%,-50%);width:50px;height:30px;border-radius:8px;border:1px solid rgba(255,255,255,.45);background:rgba(10,20,30,.45);color:#fff;font-size:11px;padding:0}
     .pos-btn.active{background:#14b8a6;color:#032b2b;border-color:#6ee7d8;font-weight:700}
-    .order-item{display:flex;gap:8px;align-items:center;background:var(--chip);border:1px solid var(--line);padding:8px;border-radius:10px;margin-top:6px}
-    .order-item .tag{font-size:12px;color:#001018;background:#5eead4;padding:2px 8px;border-radius:999px}
+    .order-item{display:flex;gap:8px;align-items:center;background:#141b23;border:1px solid var(--line);padding:8px;border-radius:8px;margin-top:6px}
+    .order-item .tag{font-size:12px;color:#1a222c;background:#8ea8c2;padding:2px 8px;border-radius:999px}
     .order-item button{width:auto;padding:6px 10px;background:#1e293b;color:#dbeafe;border:1px solid #334155}
-    .attrs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.attr-group h5{margin:8px 0;color:#a5b4fc}.attr{display:grid;grid-template-columns:1fr 74px;gap:8px;align-items:center}
+    #attrs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .attr-group{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px}
+    .attr-group h5{margin:0 0 8px;color:var(--gold);font-size:11px;text-transform:uppercase;letter-spacing:1px}
+    .attrs{display:grid;grid-template-columns:1fr 1fr;gap:4px 8px}
+    .attr{display:grid;grid-template-columns:1fr 48px;gap:6px;align-items:center;padding:3px 5px;border:1px solid var(--line-soft);border-radius:5px;background:#171f28}
+    .attr label{font-size:12px;color:#d4dde8;line-height:1.15}
+    .attr input{height:26px;padding:2px 4px;text-align:center;font-weight:700;color:var(--value);background:linear-gradient(180deg,#0f141b,#151d27);border-color:#4c5d70}
+    @media (max-width: 1100px){.compact-grid{grid-template-columns:1fr} .pitch{max-width:240px}}
+    @media (max-width: 900px){#attrs{grid-template-columns:1fr}.attrs{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -35,16 +52,20 @@
   <section id="page-player" class="page active card">
     <h3>Oyuncu Kaydet</h3>
     <div class="row"><input id="name" placeholder="Oyuncu adı"/><input id="teamCount" type="number" min="2" max="4" value="2"/></div>
-    <h4>Hazır Profil (Opsiyonel)</h4>
-    <div class="row"><select id="presetTeam"><option value="">Takım seç</option></select><select id="presetPlayer"><option value="">Oyuncu seç</option></select></div>
-    <p class="muted">Büyük Türk takımlarından sınırlı örnek veri. Seçince form dolar, sonra düzenleyebilirsin.</p>
-
-    <h4>Saha Üzerinden Mevki Seç</h4>
-    <div class="pitch" id="pitch"><div class="midline"></div></div>
-    <div id="posOrder" class="muted" style="margin-top:8px">Mevki seçilmedi.</div>
-
-    <h4>Özellikler (FM tarzı)</h4>
-    <div id="attrs"></div>
+    <div class="compact-grid">
+      <div class="compact-left">
+        <h4>Hazır Profil (Opsiyonel)</h4>
+        <div class="row"><select id="presetTeam"><option value="">Takım seç</option></select><select id="presetPlayer"><option value="">Oyuncu seç</option></select></div>
+        <p class="muted">Sınırlı örnek veri. Seçince form dolar, sonra düzenleyebilirsin.</p>
+        <h4>Saha Üzerinden Mevki Seç</h4>
+        <div class="pitch" id="pitch"><div class="midline"></div></div>
+        <div id="posOrder" class="muted" style="margin-top:8px">Mevki seçilmedi.</div>
+      </div>
+      <div class="compact-right">
+        <h4>Özellikler (FM kartı)</h4>
+        <div id="attrs"></div>
+      </div>
+    </div>
     <button id="addBtn" style="margin-top:12px">Oyuncuyu Kaydet</button>
   </section>
 
@@ -85,7 +106,7 @@ const presetData={
   ]
 };
 const pitchLayout=[['GK',50,92],['LB',20,73],['CB',50,73],['RB',80,73],['DM',50,58],['CM',50,48],['AM',50,36],['LW',20,23],['ST',50,14],['RW',80,23]];
-const attrGroups={Physical:[['acceleration','Hızlanma'],['pace','Hız'],['stamina','Dayanıklılık'],['strength','Güç'],['agility','Çeviklik'],['jumpingReach','Zıplama']],Technical:[['technique','Teknik'],['dribbling','Top Sürme'],['passing','Pas'],['finishing','Bitiricilik'],['firstTouch','İlk Kontrol'],['longShots','Uzaktan Şut'],['tackling','Müdahale'],['marking','Markaj']],Mental:[['vision','Vizyon'],['positioning','Pozisyon Alma'],['decisions','Karar Verme'],['composure','Soğukkanlılık'],['aggression','Agresiflik'],['teamwork','Takım Oyunu'],['workRate','Çalışkanlık']],Goalkeeping:[['reflexes','Refleks'],['handling','Top Tutma']]};
+const attrGroups={"Fiziksel":[['acceleration','Hızlanma'],['pace','Hız'],['stamina','Dayanıklılık'],['strength','Güç'],['agility','Çeviklik'],['jumpingReach','Zıplama']],"Teknik":[['technique','Teknik'],['dribbling','Top Sürme'],['passing','Pas'],['finishing','Bitiricilik'],['firstTouch','İlk Kontrol'],['longShots','Uzaktan Şut'],['tackling','Müdahale'],['marking','Markaj']],"Mental":[['vision','Vizyon'],['positioning','Pozisyon Alma'],['decisions','Karar Verme'],['composure','Soğukkanlılık'],['aggression','Agresiflik'],['teamwork','Takım Oyunu'],['workRate','Çalışkanlık']],"Kalecilik":[['reflexes','Refleks'],['handling','Top Tutma']]};
 let players=[];let selectedPositions=[];
 const byId=id=>document.getElementById(id);
 byId('tab-player').onclick=()=>switchTab('player');byId('tab-team').onclick=()=>switchTab('team');
