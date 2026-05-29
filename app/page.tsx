@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { presetPlayerPools } from "@/lib/preset-player-pools";
 const positionGrid = [
   ["LW", "ST", "RW"],
   ["", "AM", ""],
@@ -10,16 +11,12 @@ const positionGrid = [
   ["", "GK", ""],
 ];
 
-import { presetPlayerPools } from "@/lib/preset-player-pools";
-
 const statGroups: Array<{ title: string; items: string[] }> = [
   { title: "FIZIKSEL", items: ["Hizlanma", "Hiz", "Dayaniklilik", "Guc", "Ceviklik", "Ziplama"] },
   { title: "TEKNIK", items: ["Teknik", "Top Surme", "Pas", "Bitiricilik", "Ilk Kontrol", "Uzaktan Sut", "Mudahale", "Markaj"] },
   { title: "MENTAL", items: ["Vizyon", "Pozisyon Alma", "Karar Verme", "Sogukkanlilik", "Agresiflik", "Takim Oyunu", "Caliskanlik"] },
   { title: "KALECILIK", items: ["Refleks", "Top Tutma"] },
 ];
-
-type Priority = "Birincil" | "Ikincil" | "Alternatif";
 
 export default function HomePage() {
   const [tab, setTab] = useState<"register" | "teams">("register");
@@ -28,7 +25,6 @@ export default function HomePage() {
   const [teamProfile, setTeamProfile] = useState("");
   const [presetPlayer, setPresetPlayer] = useState("");
   const [selectedPosition, setSelectedPosition] = useState<string[]>(["LW", "ST", "AM"]);
-  const [priorityOrder, setPriorityOrder] = useState<Priority[]>(["Birincil", "Ikincil", "Alternatif"]);
   const [stats, setStats] = useState<Record<string, number>>(
     Object.fromEntries(statGroups.flatMap((group) => group.items.map((item) => [item, 10]))),
   );
@@ -38,13 +34,12 @@ export default function HomePage() {
   function togglePosition(pos: string) {
     setSelectedPosition((prev) => {
       if (prev.includes(pos)) return prev.filter((p) => p !== pos);
-      if (prev.length >= 3) return prev;
       return [...prev, pos];
     });
   }
 
   function movePriority(index: number, direction: -1 | 1) {
-    setPriorityOrder((prev) => {
+    setSelectedPosition((prev) => {
       const next = [...prev];
       const target = index + direction;
       if (target < 0 || target >= next.length) return prev;
@@ -110,7 +105,7 @@ export default function HomePage() {
                 {selectedPosition.map((pos, index) => (
                   <div key={pos} className="priority-item">
                     <span>{pos}</span>
-                    <span className="pill">{priorityOrder[index] ?? "Alternatif"}</span>
+                    <span className="pill">{index === 0 ? "Birincil" : index === 1 ? "Ikincil" : "Alternatif"}</span>
                     <div className="prio-actions">
                       <button onClick={() => movePriority(index, -1)}>↑</button>
                       <button onClick={() => movePriority(index, 1)}>↓</button>

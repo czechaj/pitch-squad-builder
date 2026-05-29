@@ -44,7 +44,16 @@ function positionalScore(player: Player, position: Position): number {
 }
 
 function playerPower(player: Player): number {
-  return Math.max(...player.positions.map((p, i) => positionalScore(player, p) * (i === 0 ? 1 : Math.max(0.6, 1 - i * 0.15))));
+  const [primary, secondary, ...alternatives] = player.positions;
+  if (!primary) return 0;
+
+  const primaryScore = positionalScore(player, primary) * 10;
+  const secondaryScore = secondary ? positionalScore(player, secondary) * 7 : 0;
+  const alternativeScore = alternatives.length
+    ? alternatives.reduce((sum, position) => sum + positionalScore(player, position), 0) * (3 / alternatives.length)
+    : 0;
+
+  return (primaryScore + secondaryScore + alternativeScore) / 20;
 }
 
 export function calculateBalance(input: unknown) {
