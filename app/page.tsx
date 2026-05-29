@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { presetPlayerPools } from "@/lib/preset-player-pools";
+import { presetPlayerPools, presetPlayerProfiles } from "@/lib/preset-player-pools";
 const positionGrid = [
   ["LW", "ST", "RW"],
   ["", "AM", ""],
@@ -25,11 +25,16 @@ export default function HomePage() {
   const [teamProfile, setTeamProfile] = useState("");
   const [presetPlayer, setPresetPlayer] = useState("");
   const [selectedPosition, setSelectedPosition] = useState<string[]>(["LW", "ST", "AM"]);
+  const [saveStatus, setSaveStatus] = useState<string>("");
   const [stats, setStats] = useState<Record<string, number>>(
     Object.fromEntries(statGroups.flatMap((group) => group.items.map((item) => [item, 10]))),
   );
 
   const presetPlayers = useMemo(() => (teamProfile ? presetPlayerPools[teamProfile] || [] : []), [teamProfile]);
+  const defaultStats = useMemo(
+    () => Object.fromEntries(statGroups.flatMap((group) => group.items.map((item) => [item, 10]))),
+    [],
+  );
 
   function togglePosition(pos: string) {
     setSelectedPosition((prev) => {
@@ -48,6 +53,45 @@ export default function HomePage() {
       next[target] = temp;
       return next;
     });
+  }
+
+  function onSelectPreset(name: string) {
+    setPresetPlayer(name);
+    if (!name) return;
+    const profile = presetPlayerProfiles[name];
+    if (!profile) {
+      setPlayerName(name);
+      return;
+    }
+
+    setPlayerName(name);
+    setPower(profile.power);
+    setSelectedPosition(profile.positions);
+    setStats({ ...defaultStats, ...profile.stats });
+  }
+
+  async function onSavePlayer() {
+    setSaveStatus("Kaydediliyor...");
+    try {
+      const response = await fetch("/api/players", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          roomId: "mock-room-001",
+          name: playerName,
+          power,
+          positions: selectedPosition,
+          stats,
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || "Kayit basarisiz");
+      }
+      setSaveStatus(`Kaydedildi (id: ${result.playerId})`);
+    } catch (error: any) {
+      setSaveStatus(`Hata: ${error.message || "Kayit basarisiz"}`);
+    }
   }
 
   return (
@@ -77,7 +121,7 @@ export default function HomePage() {
                   <option value="">Takim sec</option>
                   {Object.keys(presetPlayerPools).map((team) => <option key={team} value={team}>{team}</option>)}
                 </select>
-                <select value={presetPlayer} onChange={(e) => setPresetPlayer(e.target.value)}>
+                <select value={presetPlayer} onChange={(e) => onSelectPreset(e.target.value)}>
                   <option value="">Oyuncu sec</option>
                   {presetPlayers.map((name) => <option key={name} value={name}>{name}</option>)}
                 </select>
@@ -140,7 +184,8 @@ export default function HomePage() {
             </div>
           </div>
 
-          <button className="save-btn">Oyuncuyu Kaydet</button>
+          <button className="save-btn" onClick={onSavePlayer}>Oyuncuyu Kaydet</button>
+          {saveStatus ? <p className="muted">{saveStatus}</p> : null}
         </section>
       ) : (
         <section className="panel">
