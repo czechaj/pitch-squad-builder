@@ -52,6 +52,29 @@ app.post("/auth/mock-otp/verify", async (req, reply) => {
   return reply.send({ ok: true, userId: user.id, role: user.role, phoneE164 });
 });
 
+app.post("/auth/bootstrap-admin", async (req, reply) => {
+  const body = z.object({ phone: z.string() }).parse(req.body);
+  const phoneE164 = normalizeTrPhone(body.phone);
+  const adminCount = await prisma.user.count({ where: { role: Role.ADMIN } });
+
+  let user = await prisma.user.findUnique({ where: { phoneE164 } });
+
+  if (adminCount > 0) {
+    if (!user || user.role !== Role.ADMIN) {
+      return reply.code(403).send({ ok: false, error: "Ilk admin zaten tanimli. Bu ekrandan yeni admin olusturulamaz." });
+    }
+    return reply.send({ ok: true, userId: user.id, role: user.role, phoneE164 });
+  }
+
+  if (!user) {
+    user = await prisma.user.create({ data: { phoneE164, role: Role.ADMIN } });
+  } else if (user.role !== Role.ADMIN) {
+    user = await prisma.user.update({ where: { id: user.id }, data: { role: Role.ADMIN } });
+  }
+
+  return reply.send({ ok: true, userId: user.id, role: user.role, phoneE164 });
+});
+
 app.post("/rooms", async (req, reply) => {
   const body = z.object({ adminUserId: z.string(), name: z.string().min(2), invitedPhones: z.array(z.string()).default([]) }).parse(req.body);
   const adminUser = await prisma.user.findUnique({ where: { id: body.adminUserId } });

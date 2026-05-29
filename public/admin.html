@@ -5,53 +5,182 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pitch Squad Builder - Admin</title>
   <style>
-    :root { --bg:#111418; --card:#1a2027; --text:#e4e9ef; --muted:#9aa6b5; --line:#2f3a47; }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;background:#111418;color:var(--text)}
-    .wrap{max-width:860px;margin:0 auto;padding:20px}
-    .card{background:#1a2027;border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
-    input,button,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid var(--line);background:#141b23;color:var(--text)}
-    button{cursor:pointer;font-weight:700;background:#253240}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .muted{color:var(--muted);font-size:13px}
-    ul{margin:8px 0;padding-left:18px}
+    :root {
+      --bg: #111418;
+      --card: #1a2027;
+      --card-2: #141b23;
+      --text: #e4e9ef;
+      --muted: #9aa6b5;
+      --line: #2f3a47;
+      --accent: #7dd3fc;
+      --accent-2: #253240;
+    }
+    * { box-sizing: border-box }
+    body {
+      margin: 0;
+      font-family: "Trebuchet MS", "Segoe UI", Tahoma, sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(125, 211, 252, 0.12), transparent 32%),
+        linear-gradient(180deg, #0d1116 0%, #111418 100%);
+      color: var(--text);
+    }
+    .wrap { max-width: 920px; margin: 0 auto; padding: 24px 18px 40px; }
+    .topbar, .card, .option {
+      background: rgba(26, 32, 39, 0.96);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+    }
+    .brand h1 { margin: 0; font-size: 24px; }
+    .muted { color: var(--muted); font-size: 13px; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .option {
+      padding: 18px;
+      cursor: pointer;
+      transition: transform 140ms ease, border-color 140ms ease;
+    }
+    .option:hover { transform: translateY(-2px); border-color: var(--accent); }
+    .option h3 { margin: 0 0 8px; }
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .card { padding: 18px; }
+    .card h2 { margin-top: 0; }
+    .stack { display: grid; gap: 10px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    input, button, textarea {
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: var(--card-2);
+      color: var(--text);
+      font: inherit;
+    }
+    button {
+      cursor: pointer;
+      font-weight: 700;
+      background: var(--accent-2);
+    }
+    button.secondary { background: transparent; }
+    .status {
+      min-height: 20px;
+      color: var(--muted);
+      font-size: 13px;
+      white-space: pre-wrap;
+    }
+    .invite-list { margin: 0; padding-left: 18px; }
+    .invite-list li { margin-bottom: 8px; }
+    a { color: var(--accent); }
+    @media (max-width: 700px) {
+      .grid, .row { grid-template-columns: 1fr; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Admin Akışı</h1>
-    <p class="muted">Mock OTP ile giriş, oda oluşturma, davet üretme ve ref code ile katılım.</p>
-    <p><a href="/">Ana Ekrana Dön</a></p>
+    <div class="topbar">
+      <div class="brand">
+        <h1>Admin Akisi</h1>
+        <div class="muted">Admin ve davetli girisi artik ayri akislarda.</div>
+      </div>
+      <div class="actions">
+        <a href="/">Ana Ekran</a>
+        <button id="resetSessionBtn" class="secondary" type="button">Oturumu Temizle</button>
+      </div>
+    </div>
 
-    <section class="card">
-      <h3>1) Giriş (Mock OTP)</h3>
-      <div class="row">
-        <input id="phone" placeholder="05XXXXXXXXX" />
-        <button id="requestOtpBtn">Kod İste</button>
+    <section id="screen-home" class="screen active">
+      <div class="grid">
+        <button class="option" type="button" data-screen="bootstrap">
+          <h3>Ilk Admin Hesabi Olustur</h3>
+          <div class="muted">Sistemde admin yoksa telefon numaranla ilk admin kullanicisini DB'ye kaydet.</div>
+        </button>
+        <button class="option" type="button" data-screen="admin-login">
+          <h3>Admin Girisi</h3>
+          <div class="muted">Mevcut admin kullanicisi mock OTP ile giris yapip oda ve davet olusturur.</div>
+        </button>
+        <button class="option" type="button" data-screen="member-login">
+          <h3>Davetli Girisi</h3>
+          <div class="muted">Davetli kullanici kendi telefonu ve ref code ile odaya katilir.</div>
+        </button>
       </div>
-      <div class="row" style="margin-top:8px">
-        <input id="otpCode" placeholder="6 haneli kod" />
-        <button id="verifyOtpBtn">Doğrula</button>
-      </div>
-      <div id="otpInfo" class="muted" style="margin-top:8px"></div>
     </section>
 
-    <section class="card">
-      <h3>2) Admin Oda Oluştur</h3>
-      <input id="roomName" placeholder="Oda adı" />
-      <textarea id="invitedPhones" rows="4" style="margin-top:8px" placeholder="Her satıra bir telefon&#10;05XXXXXXXXX"></textarea>
-      <button id="createRoomBtn" style="margin-top:8px">Odayı Oluştur</button>
-      <div id="roomInfo" class="muted" style="margin-top:8px"></div>
-      <ul id="inviteList"></ul>
+    <section id="screen-bootstrap" class="screen">
+      <div class="card stack">
+        <h2>Ilk Admini Kaydet</h2>
+        <div class="muted">Bu adim ilk admin kullaniciyi veritabanina `ADMIN` roluyla kaydeder.</div>
+        <input id="bootstrapPhone" placeholder="05XXXXXXXXX" />
+        <button id="bootstrapAdminBtn" type="button">Admin Hesabini Olustur</button>
+        <div id="bootstrapInfo" class="status"></div>
+        <button class="secondary" type="button" data-screen="home">Geri Don</button>
+      </div>
     </section>
 
-    <section class="card">
-      <h3>3) Ref Code ile Katıl</h3>
-      <div class="row">
+    <section id="screen-admin-login" class="screen">
+      <div class="card stack">
+        <h2>Admin Girisi</h2>
+        <div class="row">
+          <input id="adminPhone" placeholder="05XXXXXXXXX" />
+          <button id="adminRequestOtpBtn" type="button">Kod Iste</button>
+        </div>
+        <div class="row">
+          <input id="adminOtpCode" placeholder="6 haneli kod" />
+          <button id="adminVerifyOtpBtn" type="button">Girisi Tamamla</button>
+        </div>
+        <div id="adminLoginInfo" class="status"></div>
+        <button class="secondary" type="button" data-screen="home">Geri Don</button>
+      </div>
+    </section>
+
+    <section id="screen-admin-panel" class="screen">
+      <div class="card stack">
+        <h2>Admin Paneli</h2>
+        <div id="adminSessionInfo" class="status"></div>
+        <input id="roomName" placeholder="Oda adi" />
+        <textarea id="invitedPhones" rows="6" placeholder="Her satira bir telefon&#10;05XXXXXXXXX"></textarea>
+        <button id="createRoomBtn" type="button">Odayi Olustur</button>
+        <div id="roomInfo" class="status"></div>
+        <ul id="inviteList" class="invite-list"></ul>
+        <button class="secondary" type="button" data-screen="home">Ana Menu</button>
+      </div>
+    </section>
+
+    <section id="screen-member-login" class="screen">
+      <div class="card stack">
+        <h2>Davetli Girisi</h2>
+        <div class="row">
+          <input id="memberPhone" placeholder="05XXXXXXXXX" />
+          <button id="memberRequestOtpBtn" type="button">Kod Iste</button>
+        </div>
+        <div class="row">
+          <input id="memberOtpCode" placeholder="6 haneli kod" />
+          <button id="memberVerifyOtpBtn" type="button">Giris Yap</button>
+        </div>
+        <div id="memberLoginInfo" class="status"></div>
+        <button class="secondary" type="button" data-screen="member-join">Ref Code Ekranina Gec</button>
+        <button class="secondary" type="button" data-screen="home">Geri Don</button>
+      </div>
+    </section>
+
+    <section id="screen-member-join" class="screen">
+      <div class="card stack">
+        <h2>Ref Code ile Odaya Katil</h2>
+        <div class="muted">Bu adim davetli kullanicinin girisi yapilmis oldugunda calisir.</div>
         <input id="joinRefCode" placeholder="REFCODE" />
-        <button id="joinBtn">Katıl</button>
+        <button id="joinBtn" type="button">Odaya Katil</button>
+        <div id="joinInfo" class="status"></div>
+        <button class="secondary" type="button" data-screen="member-login">Davetli Girisine Don</button>
       </div>
-      <div id="joinInfo" class="muted" style="margin-top:8px"></div>
     </section>
   </div>
   <script src="/admin.js"></script>
