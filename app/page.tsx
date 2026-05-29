@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-
 const positionGrid = [
   ["LW", "ST", "RW"],
   ["", "AM", ""],
@@ -11,11 +10,7 @@ const positionGrid = [
   ["", "GK", ""],
 ];
 
-const profileData: Record<string, string[]> = {
-  "Fenerbahçe 2024/25": ["Dusan Tadic", "Fred", "Irfan Can Kahveci", "Sebastian Szymanski"],
-  "Galatasaray 2024/25": ["Mauro Icardi", "Lucas Torreira", "Baris Alper Yilmaz", "Dries Mertens"],
-  "Besiktas 2024/25": ["Ciro Immobile", "Rafa Silva", "Gedson Fernandes", "Mert Gunok"],
-};
+import { presetPlayerPools } from "@/lib/preset-player-pools";
 
 const statGroups: Array<{ title: string; items: string[] }> = [
   { title: "FIZIKSEL", items: ["Hizlanma", "Hiz", "Dayaniklilik", "Guc", "Ceviklik", "Ziplama"] },
@@ -38,7 +33,7 @@ export default function HomePage() {
     Object.fromEntries(statGroups.flatMap((group) => group.items.map((item) => [item, 10]))),
   );
 
-  const presetPlayers = useMemo(() => (teamProfile ? profileData[teamProfile] || [] : []), [teamProfile]);
+  const presetPlayers = useMemo(() => (teamProfile ? presetPlayerPools[teamProfile] || [] : []), [teamProfile]);
 
   function togglePosition(pos: string) {
     setSelectedPosition((prev) => {
@@ -85,7 +80,7 @@ export default function HomePage() {
               <div className="preset-row">
                 <select value={teamProfile} onChange={(e) => setTeamProfile(e.target.value)}>
                   <option value="">Takim sec</option>
-                  {Object.keys(profileData).map((team) => <option key={team} value={team}>{team}</option>)}
+                  {Object.keys(presetPlayerPools).map((team) => <option key={team} value={team}>{team}</option>)}
                 </select>
                 <select value={presetPlayer} onChange={(e) => setPresetPlayer(e.target.value)}>
                   <option value="">Oyuncu sec</option>
