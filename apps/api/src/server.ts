@@ -54,6 +54,9 @@ app.post("/auth/mock-otp/verify", async (req, reply) => {
 
 app.post("/rooms", async (req, reply) => {
   const body = z.object({ adminUserId: z.string(), name: z.string().min(2), invitedPhones: z.array(z.string()).default([]) }).parse(req.body);
+  const adminUser = await prisma.user.findUnique({ where: { id: body.adminUserId } });
+  if (!adminUser) return reply.code(404).send({ ok: false, error: "Admin kullanıcı bulunamadı" });
+  if (adminUser.role !== Role.ADMIN) return reply.code(403).send({ ok: false, error: "Sadece ADMIN oda oluşturabilir" });
 
   const room = await prisma.room.create({
     data: {
@@ -83,6 +86,7 @@ app.post("/rooms/join-by-ref", async (req, reply) => {
   const invite = await prisma.invite.findUnique({ where: { refCode: body.refCode.toUpperCase() } });
   if (!invite) return reply.code(404).send({ ok: false, error: "Referans kodu bulunamadı" });
   if (invite.expiresAt.getTime() < Date.now()) return reply.code(400).send({ ok: false, error: "Referans kodu süresi dolmuş" });
+  if (invite.usedAt) return reply.code(400).send({ ok: false, error: "Referans kodu daha önce kullanılmış" });
   if (invite.phoneE164 !== phoneE164) return reply.code(403).send({ ok: false, error: "Bu kod bu telefon numarası için tanımlı değil" });
 
   await prisma.roomMember.upsert({

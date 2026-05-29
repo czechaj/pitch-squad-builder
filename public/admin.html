@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pitch Squad Builder - Admin</title>
+  <style>
+    :root { --bg:#111418; --card:#1a2027; --text:#e4e9ef; --muted:#9aa6b5; --line:#2f3a47; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;background:#111418;color:var(--text)}
+    .wrap{max-width:860px;margin:0 auto;padding:20px}
+    .card{background:#1a2027;border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
+    input,button,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid var(--line);background:#141b23;color:var(--text)}
+    button{cursor:pointer;font-weight:700;background:#253240}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .muted{color:var(--muted);font-size:13px}
+    ul{margin:8px 0;padding-left:18px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Admin Akışı</h1>
+    <p class="muted">Mock OTP ile giriş, oda oluşturma, davet üretme ve ref code ile katılım.</p>
+    <p><a href="/">Ana Ekrana Dön</a></p>
+
+    <section class="card">
+      <h3>1) Giriş (Mock OTP)</h3>
+      <div class="row">
+        <input id="phone" placeholder="05XXXXXXXXX" />
+        <button id="requestOtpBtn">Kod İste</button>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <input id="otpCode" placeholder="6 haneli kod" />
+        <button id="verifyOtpBtn">Doğrula</button>
+      </div>
+      <div id="otpInfo" class="muted" style="margin-top:8px"></div>
+    </section>
+
+    <section class="card">
+      <h3>2) Admin Oda Oluştur</h3>
+      <input id="roomName" placeholder="Oda adı" />
+      <textarea id="invitedPhones" rows="4" style="margin-top:8px" placeholder="Her satıra bir telefon&#10;05XXXXXXXXX"></textarea>
+      <button id="createRoomBtn" style="margin-top:8px">Odayı Oluştur</button>
+      <div id="roomInfo" class="muted" style="margin-top:8px"></div>
+      <ul id="inviteList"></ul>
+    </section>
+
+    <section class="card">
+      <h3>3) Ref Code ile Katıl</h3>
+      <div class="row">
+        <input id="joinRefCode" placeholder="REFCODE" />
+        <button id="joinBtn">Katıl</button>
+      </div>
+      <div id="joinInfo" class="muted" style="margin-top:8px"></div>
+    </section>
+  </div>
+  <script src="/admin.js"></script>
+</body>
+</html>
