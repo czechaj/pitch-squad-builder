@@ -30,7 +30,15 @@ legend { color: #e4cf8f; font-weight: 700; padding: 0 6px; font-size: 12px; }
 fieldset label { display: grid; grid-template-columns: 1fr 68px; align-items: center; gap: 8px; margin-bottom: 7px; color: #d5e2f2; font-size: 14px; }
 fieldset label:last-child { margin-bottom: 0; }
 .save-btn { width: 100%; margin-top: 14px; border: 1px solid #4d6787; background: linear-gradient(180deg, #3d5677, #2c405b); color: #fff; border-radius: 10px; padding: 11px 14px; font-weight: 700; cursor: pointer; }
+.mini-btn { border: 1px solid #4d6787; background: #223750; color: #e6f0ff; border-radius: 8px; padding: 7px 10px; cursor: pointer; }
+.team-list { margin-top: 12px; display: grid; gap: 8px; }
+.team-item { display: flex; align-items: center; justify-content: space-between; background: #111f34; border: 1px solid #2d4360; border-radius: 8px; padding: 10px; }
+.player-dialog { width: min(680px, 92vw); border: 1px solid #3f5a7f; border-radius: 10px; background: #0f1a2d; color: #e8eef7; padding: 14px; }
+.player-dialog::backdrop { background: rgba(3, 8, 16, 0.65); }
+.dialog-stats { margin: 10px 0 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 7px 12px; max-height: 46vh; overflow: auto; }
+.dialog-stats div { display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px solid #243956; padding-bottom: 3px; }
 @media (max-width: 900px) {
   .content-grid, .stats-grid { grid-template-columns: 1fr; }
   .form-head { grid-template-columns: 1fr; }
+  .dialog-stats { grid-template-columns: 1fr; }
 }

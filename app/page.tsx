@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { presetPlayerPools, presetPlayerProfiles } from "@/lib/preset-player-pools";
 const positionGrid = [
   ["LW", "ST", "RW"],
@@ -26,6 +26,9 @@ export default function HomePage() {
   const [presetPlayer, setPresetPlayer] = useState("");
   const [selectedPosition, setSelectedPosition] = useState<string[]>([]);
   const [saveStatus, setSaveStatus] = useState<string>("");
+  const [teamPlayers, setTeamPlayers] = useState<any[]>([]);
+  const [teamPlayersStatus, setTeamPlayersStatus] = useState<string>("");
+  const [playerDialog, setPlayerDialog] = useState<any | null>(null);
   const [stats, setStats] = useState<Record<string, number>>(
     Object.fromEntries(statGroups.flatMap((group) => group.items.map((item) => [item, 10]))),
   );
@@ -102,6 +105,23 @@ export default function HomePage() {
       setSaveStatus(`Hata: ${error.message || "Kayit basarisiz"}`);
     }
   }
+
+  async function loadTeamPlayers() {
+    setTeamPlayersStatus("Yukleniyor...");
+    try {
+      const response = await fetch("/api/rooms/mock-room-001/players");
+      const result = await response.json();
+      if (!response.ok || !result.ok) throw new Error(result.error || "Liste alinamadi");
+      setTeamPlayers(result.players || []);
+      setTeamPlayersStatus("");
+    } catch (error: any) {
+      setTeamPlayersStatus(`Hata: ${error.message || "Liste alinamadi"}`);
+    }
+  }
+
+  useEffect(() => {
+    if (tab === "teams") loadTeamPlayers();
+  }, [tab]);
 
   return (
     <main className="legacy-main">
@@ -199,7 +219,39 @@ export default function HomePage() {
       ) : (
         <section className="panel">
           <h2>Takim Olustur</h2>
-          <p className="muted">Bu adimda oyuncular secilip dengeleme mutation endpointlerine gonderilecek.</p>
+          <p className="muted">Bu adimda odadaki kayitli oyuncular listelenir. Yetki kontrolleri sonraki adimda eklenecek.</p>
+          <button className="mini-btn" onClick={loadTeamPlayers}>Listeyi Yenile</button>
+          {teamPlayersStatus ? <p className="muted">{teamPlayersStatus}</p> : null}
+          <div className="team-list">
+            {teamPlayers.map((player) => (
+              <div className="team-item" key={player.id}>
+                <div>
+                  <strong>{player.name}</strong>
+                  <p className="muted">Guc: {player.power} | {player.primaryPosition}{player.secondaryPosition ? ` / ${player.secondaryPosition}` : ""}</p>
+                </div>
+                <button className="mini-btn" onClick={() => setPlayerDialog(player)}>Bilgi</button>
+              </div>
+            ))}
+            {!teamPlayers.length && !teamPlayersStatus ? <p className="muted">Bu room icin kayitli oyuncu yok.</p> : null}
+          </div>
+
+          {playerDialog ? (
+            <dialog className="player-dialog" open>
+              <h3>{playerDialog.name}</h3>
+              <p className="muted">Guc: {playerDialog.power}</p>
+              <p className="muted">
+                Mevkiler: {playerDialog.primaryPosition}
+                {playerDialog.secondaryPosition ? `, ${playerDialog.secondaryPosition}` : ""}
+                {playerDialog.alternativePositions?.length ? `, ${playerDialog.alternativePositions.join(", ")}` : ""}
+              </p>
+              <div className="dialog-stats">
+                {Object.entries(playerDialog.stats || {}).map(([key, value]) => (
+                  <div key={key}><span>{key}</span><strong>{String(value)}</strong></div>
+                ))}
+              </div>
+              <button className="mini-btn" onClick={() => setPlayerDialog(null)}>Kapat</button>
+            </dialog>
+          ) : null}
         </section>
       )}
     </main>
