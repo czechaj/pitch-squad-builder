@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { verifyOtp } from "@/lib/mock-store";
+import { env } from "@/lib/env";
+import { takeRateLimit } from "@/lib/rate-limit";
 
 const payloadSchema = z.object({
   phone: z.string().trim().regex(/^(\+90|0)?5\d{9}$/, "Gecerli telefon girin"),
@@ -9,7 +11,16 @@ const payloadSchema = z.object({
 
 export async function POST(req: Request) {
   try {
+    if (!env.mockOtpEnabled) {
+      return NextResponse.json({ ok: false, code: "FEATURE_DISABLED", error: "Mock OTP disabled" }, { status: 403 });
+    }
+
     const body = payloadSchema.parse(await req.json());
+    const limited = takeRateLimit(`otp:verify:${body.phone}`, 10, 5 * 60_000);
+    if (!limited.ok) {
+      return NextResponse.json({ ok: false, code: "RATE_LIMITED", error: `Too many attempts. Retry in ${limited.retryAfterSec}s` }, { status: 429 });
+    }
+
     const user = await verifyOtp(body.phone, body.code);
     return NextResponse.json({ ok: true, userId: user.id, role: user.role, phoneE164: user.phoneE164 });
   } catch (error: unknown) {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { bootstrapAdmin } from "@/lib/mock-store";
+import { takeRateLimit } from "@/lib/rate-limit";
 
 const payloadSchema = z.object({
   phone: z.string().trim().regex(/^(\+90|0)?5\d{9}$/, "Gecerli telefon girin"),
@@ -9,6 +10,11 @@ const payloadSchema = z.object({
 export async function POST(req: Request) {
   try {
     const body = payloadSchema.parse(await req.json());
+    const limited = takeRateLimit(`admin:bootstrap:${body.phone}`, 3, 10 * 60_000);
+    if (!limited.ok) {
+      return NextResponse.json({ ok: false, code: "RATE_LIMITED", error: `Too many attempts. Retry in ${limited.retryAfterSec}s` }, { status: 429 });
+    }
+
     const user = await bootstrapAdmin(body.phone);
     return NextResponse.json({ ok: true, userId: user.id, role: user.role, phoneE164: user.phoneE164 });
   } catch (error: unknown) {
