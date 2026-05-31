@@ -8,12 +8,14 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  phoneE164 String   @unique
-  role      String   @default("USER")
-  createdAt DateTime @default(now())
-  rooms     Room[]   @relation("RoomAdmin")
-  players   Player[]
+  id             String           @id @default(cuid())
+  phoneE164      String           @unique
+  role           String           @default("USER")
+  createdAt      DateTime         @default(now())
+  roomsAdmined   Room[]           @relation("RoomAdmin")
+  memberships    RoomMembership[]
+  playerProfiles PlayerProfile[]
+  players        Player[]
 }
 
 model OtpCode {
@@ -25,12 +27,15 @@ model OtpCode {
 }
 
 model Room {
-  id          String   @id @default(cuid())
-  name        String
-  adminUserId String
-  admin       User     @relation("RoomAdmin", fields: [adminUserId], references: [id])
-  createdAt   DateTime @default(now())
-  invites     Invite[]
+  id             String           @id @default(cuid())
+  name           String
+  adminUserId    String
+  admin          User             @relation("RoomAdmin", fields: [adminUserId], references: [id])
+  createdAt      DateTime         @default(now())
+  invites        Invite[]
+  memberships    RoomMembership[]
+  playerProfiles PlayerProfile[]
+  players        Player[]
 }
 
 model Invite {
@@ -44,15 +49,48 @@ model Invite {
   createdAt DateTime  @default(now())
 }
 
-model Player {
-  id               String   @id @default(cuid())
-  userId           String?
-  user             User?    @relation(fields: [userId], references: [id])
-  name             String
-  power            Int
-  primaryPosition  String
-  secondaryPosition String?
+model RoomMembership {
+  id       String   @id @default(cuid())
+  roomId   String
+  userId   String
+  joinedAt DateTime @default(now())
+  room     Room     @relation(fields: [roomId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+
+  @@unique([roomId, userId])
+}
+
+model PlayerProfile {
+  id                   String   @id @default(cuid())
+  roomId               String
+  userId               String
+  name                 String
+  primaryPosition      String
+  secondaryPosition    String?
   alternativePositions String
-  statsJson        String
-  createdAt        DateTime @default(now())
+  statsJson            String
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  room                 Room     @relation(fields: [roomId], references: [id])
+  user                 User     @relation(fields: [userId], references: [id])
+  Player               Player[]
+
+  @@unique([roomId, userId])
+}
+
+model Player {
+  id                   String         @id @default(cuid())
+  roomId               String?
+  userId               String?
+  profileId            String?
+  room                 Room?          @relation(fields: [roomId], references: [id])
+  user                 User?          @relation(fields: [userId], references: [id])
+  profile              PlayerProfile? @relation(fields: [profileId], references: [id])
+  name                 String
+  power                Int
+  primaryPosition      String
+  secondaryPosition    String?
+  alternativePositions String
+  statsJson            String
+  createdAt            DateTime       @default(now())
 }
