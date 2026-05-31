@@ -2,12 +2,19 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { postJson } from "@/app/shared/api";
 import { AdminLoginCard } from "./_components/AdminLoginCard";
 import { BootstrapAdminCard } from "./_components/BootstrapAdminCard";
 import { MemberJoinCard } from "./_components/MemberJoinCard";
 import { MemberLoginCard } from "./_components/MemberLoginCard";
 import { RoomCreateCard } from "./_components/RoomCreateCard";
 import type { InviteItem, Screen, SessionUser } from "./_components/types";
+
+type BootstrapAdminResponse = { userId: string; phoneE164: string; role: string };
+type OtpRequestResponse = { phoneE164: string; mockCode: string };
+type OtpVerifyResponse = { userId: string; phoneE164: string; role: string };
+type CreateRoomResponse = { roomId: string; invites: InviteItem[] };
+type JoinRoomResponse = { roomId: string };
 
 export default function AdminPage() {
   const [screen, setScreen] = useState<Screen>("home");
@@ -27,17 +34,6 @@ export default function AdminPage() {
   const [joinRefCode, setJoinRefCode] = useState("");
 
   const setMsg = (key: string, msg: string) => setInfo((s) => ({ ...s, [key]: msg }));
-
-  const postJson = async (url: string, body: unknown) => {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.error || "Islem basarisiz");
-    return data;
-  };
 
   const adminSessionInfo = useMemo(() => {
     if (!admin.userId) return "Henuz admin girisi yapilmadi.";
@@ -65,7 +61,7 @@ export default function AdminPage() {
           onBack={() => setScreen("home")}
           onSubmit={async () => {
             try {
-              const data = await postJson("/api/auth/bootstrap-admin", { phone: bootstrapPhone.trim() });
+              const data = await postJson<BootstrapAdminResponse>("/api/auth/bootstrap-admin", { phone: bootstrapPhone.trim() });
               setAdmin({ userId: data.userId, phoneE164: data.phoneE164, role: data.role });
               setMsg("bootstrap", `Admin kaydedildi: ${data.phoneE164}`);
               setScreen("admin-login");
@@ -86,7 +82,7 @@ export default function AdminPage() {
           onBack={() => setScreen("home")}
           onRequestCode={async () => {
             try {
-              const data = await postJson("/api/auth/mock-otp/request", { phone: adminPhone.trim() });
+              const data = await postJson<OtpRequestResponse>("/api/auth/mock-otp/request", { phone: adminPhone.trim() });
               setMsg("adminLogin", `Kod olusturuldu (mock): ${data.mockCode}`);
             } catch (error: any) {
               setMsg("adminLogin", error.message);
@@ -94,7 +90,7 @@ export default function AdminPage() {
           }}
           onSubmit={async () => {
             try {
-              const data = await postJson("/api/auth/mock-otp/verify", { phone: adminPhone.trim(), code: adminOtpCode.trim() });
+              const data = await postJson<OtpVerifyResponse>("/api/auth/mock-otp/verify", { phone: adminPhone.trim(), code: adminOtpCode.trim() });
               if (data.role !== "ADMIN") throw new Error("Bu kullanici admin degil.");
               setAdmin({ userId: data.userId, phoneE164: data.phoneE164, role: data.role });
               setMsg("adminLogin", `Admin girisi basarili: ${data.phoneE164}`);
@@ -118,7 +114,7 @@ export default function AdminPage() {
           onBackHome={() => setScreen("home")}
           onSubmit={async () => {
             try {
-              const data = await postJson("/api/rooms", {
+              const data = await postJson<CreateRoomResponse>("/api/rooms", {
                 adminUserId: admin.userId,
                 name: roomName.trim(),
                 invitedPhones: invitedPhones.split("\n").map((s) => s.trim()).filter(Boolean),
@@ -143,7 +139,7 @@ export default function AdminPage() {
           onBack={() => setScreen("home")}
           onRequestCode={async () => {
             try {
-              const data = await postJson("/api/auth/mock-otp/request", { phone: memberPhone.trim() });
+              const data = await postJson<OtpRequestResponse>("/api/auth/mock-otp/request", { phone: memberPhone.trim() });
               setMsg("memberLogin", `Kod olusturuldu (mock): ${data.mockCode}`);
             } catch (error: any) {
               setMsg("memberLogin", error.message);
@@ -151,7 +147,7 @@ export default function AdminPage() {
           }}
           onSubmit={async () => {
             try {
-              const data = await postJson("/api/auth/mock-otp/verify", { phone: memberPhone.trim(), code: memberOtpCode.trim() });
+              const data = await postJson<OtpVerifyResponse>("/api/auth/mock-otp/verify", { phone: memberPhone.trim(), code: memberOtpCode.trim() });
               setMember({ userId: data.userId, phoneE164: data.phoneE164, role: data.role });
               setMsg("memberLogin", `Davetli girisi basarili: ${data.phoneE164}`);
               setScreen("member-join");
@@ -170,7 +166,7 @@ export default function AdminPage() {
           onBack={() => setScreen("member-login")}
           onSubmit={async () => {
             try {
-              const data = await postJson("/api/rooms/join-by-ref", {
+              const data = await postJson<JoinRoomResponse>("/api/rooms/join-by-ref", {
                 refCode: joinRefCode.trim(),
                 userId: member.userId,
                 phone: memberPhone.trim(),
