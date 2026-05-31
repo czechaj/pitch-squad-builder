@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createPlayer as createPlayerFallback } from "@/lib/mock-store";
+import { logApiRequest, readJsonWithLimit, sanitizeError } from "@/lib/api-guard";
 
 const playerSchema = z.object({
   roomId: z.string().min(1),
@@ -13,7 +14,8 @@ const playerSchema = z.object({
 
 export async function POST(req: Request) {
   try {
-    const body = playerSchema.parse(await req.json());
+    logApiRequest(req, "/api/players");
+    const body = playerSchema.parse(await readJsonWithLimit(req));
     const [primaryPosition, secondaryPosition, ...alternatives] = body.positions;
     try {
       const reqRuntime = eval("require");
@@ -36,7 +38,7 @@ export async function POST(req: Request) {
       const player = await createPlayerFallback(body);
       return NextResponse.json({ ok: true, playerId: player.id, storage: "fallback" });
     }
-  } catch (e: any) {
-    return NextResponse.json({ ok: false, error: e.message }, { status: 400 });
+  } catch (e: unknown) {
+    return NextResponse.json({ ok: false, error: sanitizeError(e) }, { status: 400 });
   }
 }
